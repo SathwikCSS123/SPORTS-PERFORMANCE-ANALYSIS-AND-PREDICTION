@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archery Calculator</title>
+    <link rel="stylesheet" href="https://pyscript.net.alpha/pyscript.css" />
+    <style>
+        body {
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        h1 {
+            font-size: 40px;
+            color: red
+        }
+        h2 {
+            font-size: 30px;
+            color: blue
+        }
+        form {
+            margin-top: 20px;
+        }
+        input {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        video {
+            margin-top: 20px;
+            width: 600px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Archery Points Calculator</h1>
+    <video controls>
+        <source src="Deepikakumari.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <h2 id="result"></h2>
+    <form id="prediction-form">
+        <label for="rank">Athlete Rank:</label><br>
+        <input type="number" id="rank" name="rank" min="1" max="50" required><br>
+        <label for="angle">Initial Angle (degrees):</label><br>
+        <input type="number" id="angle" name="angle" step="0.01" required><br>
+        <label for="speed">Wind Speed (m/s):</label><br>
+        <input type="number" id="speed" name="speed" step="0.01" required><br>
+        <button type="submit">Calculate</button>
+    </form>
+
+    <div id="prediction-result">
+        <h2>Prediction Result:</h2>
+        <p id="predicted-distance"></p>
+        <p id="actual-distance"></p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#prediction-form').submit(function (event) {
+                event.preventDefault();
+                var formData = $(this).serialize();
+                $.ajax({
+                    type: 'POST',
+                    url: '/predict',
+                    data: formData,
+                    success: function (response) {
+                        $('#predicted-distance').text('Predicted Distance: ' + response.predicted_distance.toFixed(2) + ' meters');
+                        $('#actual-distance').text('Actual Distance: ' + response.actual_distance.toFixed(2) + ' meters');
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+Countries Time(sec)
+
+JAMAICA
+JAPAN
+CANADA
+CHINA
+ENGLAND
+BRAZIL
+
+37.27
+37.6
+37.64
+37.9
+37.98
+38.41

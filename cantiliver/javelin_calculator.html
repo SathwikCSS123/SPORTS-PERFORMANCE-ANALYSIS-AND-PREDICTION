@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Javelin Throw Calculator</title>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <style>
+        body {
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        h1 {
+            font-size: 40px;
+            color: red;
+        }
+        h2 {
+            font-size: 30px;
+            color: blue;
+        }
+        form {
+            margin-top: 20px;
+        }
+        input {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        video {
+            margin-top: 20px;
+            width: 600px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Javelin Throw Distance Calculator</h1>
+    <video controls>
+        <source src="neerajchopra.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <h2 id="result"></h2>
+    <form id="prediction-form">
+        <label for="rank">Athlete Rank:</label><br>
+        <input type="number" id="rank" name="rank" min="1" max="50" required><br>
+        <label for="velocity">Initial Velocity (m/s):</label><br>
+        <input type="number" id="velocity" name="velocity" step="0.01" required><br>
+        <label for="angle">Angle of the Throw (degrees):</label><br>
+        <input type="number" id="angle" name="angle" step="0.01" required><br>
+        <button type="button" onclick="predict()">Calculate</button>
+    </form>
+
+    <div id="prediction-result">
+        <h2>Prediction Result:</h2>
+        <p id="output"></p>
+    </div>
+
+    <py-script>
+        import micropip
+        import math
+        import asyncio
+
+        async def main():
+            await micropip.install("pandas")
+            await micropip.install("scikit-learn")
+            import pandas as pd
+            from sklearn.model_selection import train_test_split
+            from sklearn.linear_model import LinearRegression
+
+            data = {
+                "Rank": list(range(1, 51)),
+                "Athlete": ["Neeraj Chopra", "Jakub Vadlejch", "Vitezslav Vesely", "Julian Weber", "Arshad Nadeem",
+                            "Aliaksei Katkavets", "Andrian Mardare", "Lassi Etelätalo", "Johannes Vetter", "Pavel Mialeshka",
+                            "Kim Amb", "Alexandru Mihaita Novac", "Anderson Peters", "Curtis Thompson", "Rocco van Rooyen",
+                            "Edis Matusevicius", "Keshorn Walcott", "Gatis Cakss", "Julius Yego", "Oliver Helander",
+                            "Cheng Chao-Tsun", "Magnus Kirt", "Ehab Abdelrahman", "Norbert Rivasz-Toth", "Takuto Kominami",
+                            "Cyprian Mrzyglod", "Alexandru Novac", "Odei Jainaga", "Ihab Abdelrahman", "Michael Shuey",
+                            "Kirt Magnus", "Ihsan Özturk", "Mohd Amsyar Azwa", "Hussain Al-Hizam", "Ashraf Amgad Elseify",
+                            "Luis Rivera", "Mohamed Mohamud", "Samuel Yeboah", "Igor Kachanov", "Pablo Diaz",
+                            "Marco Fortes", "Michal Deski", "Tomas Stanek", "Ricardo Pineda", "Daniel Stahl",
+                            "Wojciech Nowicki", "Dmytro Kosynski", "Giovanni Faloci", "Andrea Pilat", "Tanel Laanmäe"],
+                "Country": ["IND", "CZE", "CZE", "GER", "PAK", "BLR", "MDA", "FIN", "GER", "BLR",
+                            "SWE", "ROU", "GRN", "USA", "RSA", "LTU", "TTO", "LAT", "KEN", "FIN",
+                            "TPE", "EST", "EGY", "HUN", "JPN", "POL", "ROU", "ESP", "EGY", "USA",
+                            "EST", "TUR", "MAS", "KSA", "QAT", "MEX", "SOM", "GHA", "RUS", "ARG",
+                            "POR", "POL", "CZE", "VEN", "SWE", "POL", "UKR", "ITA", "SLO", "EST"],
+                "Distance (m)": [87.58, 86.67, 85.44, 85.30, 84.62, 83.71, 83.30, 83.28, 82.52, 82.28,
+                                 79.69, 79.29, 78.60, 78.20, 77.80, 77.40, 77.00, 76.60, 76.20, 75.80,
+                                 75.40, 75.00, 74.60, 74.20, 73.80, 73.40, 73.00, 72.60, 72.20, 71.80,
+                                 71.40, 71.00, 70.60, 70.20, 69.80, 69.40, 69.00, 68.60, 68.20, 67.80,
+                                 67.40, 67.00, 66.60, 66.20, 65.80, 65.40, 65.00, 64.60, 64.20, 63.80]
+            }
+
+            df = pd.DataFrame(data)
+
+            X = df[['Rank']]
+            y = df['Distance (m)']
+
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+            model = LinearRegression()
+            model.fit(X_train, y_train)
+
+            def predict_distance(rank, velocity, angle):
+                time_of_flight = (2 * velocity * math.sin(math.radians(angle))) / 9.81
+                predicted_distance = velocity * math.cos(math.radians(angle)) * time_of_flight
+                actual_distance = df.loc[df['Rank'] == rank, 'Distance (m)'].values[0]
+                return predicted_distance, actual_distance
+
+            global predict
+
+            def predict():
+                rank = int(Element('rank').value)
+                velocity = float(Element('velocity').value)
+                angle = float(Element('angle').value)
+
+                predicted_distance, actual_distance = predict_distance(rank, velocity, angle)
+
+                output = (f"Initial Velocity: {velocity} m/s, Angle: {angle} degrees\n"
+                          f"Predicted Distance: {predicted_distance:.2f} meters\n"
+                          f"Actual Distance: {actual_distance:.2f} meters")
+
+                Element('output').text = output
+
+        asyncio.ensure_future(main())
+    </py-script>
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+</body>
+</html>
